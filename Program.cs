@@ -19,7 +19,6 @@ namespace LinuxWebJobs
 
             // "output.txt" ファイルのパスを設定
             string filePath = Path.Combine(folderPath, "output.txt");
-
             // ファイルストリームを開き、StreamWriterを使用して書き込む
             using (StreamWriter writer = new StreamWriter(filePath, true))
             {
