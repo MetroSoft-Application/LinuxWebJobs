@@ -1,2 +1,2 @@
 ﻿#!/bin/bash
-dotnet LinuxWebJobs.dll
+dotnet ./LinuxWebJobs.dll
