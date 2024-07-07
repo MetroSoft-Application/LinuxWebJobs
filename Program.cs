@@ -11,7 +11,7 @@ namespace LinuxWebJobs
         static void Main(string[] args)
         {
             // Application Insights のインストルメンテーションキーを設定
-            string instrumentationKey = "566d9abe-f93a-408d-9315-4a002da9d32b";
+            string instrumentationKey = "";
             var telemetryConfiguration = new TelemetryConfiguration(instrumentationKey);
             var telemetryClient = new TelemetryClient(telemetryConfiguration);
 
