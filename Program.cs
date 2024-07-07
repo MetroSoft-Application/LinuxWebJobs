@@ -47,6 +47,8 @@ namespace LinuxWebJobs
                     writer.WriteLine(now.ToString());
                     writer.Flush(); // ファイルに直ちに書き出す
 
+                    Console.WriteLine($"now:{now.ToString()}");
+
                     //1秒間待機
                     Thread.Sleep(1000);
                 }
