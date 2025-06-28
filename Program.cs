@@ -22,6 +22,8 @@ namespace LinuxWebJobs
         private static Thread? _shutdownFileCheckThread;
         private static readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
         private static TelemetryClient? _telemetryClient;
+        // プロセス識別用GUID（起動時に生成）
+        private static readonly string _processId = Guid.NewGuid().ToString("N")[..4];
 
         /// <summary>
         /// SIGTERMやその他の終了シグナルを処理
@@ -124,6 +126,7 @@ namespace LinuxWebJobs
 
             // 起動メッセージ
             LogAndTrackImmediate($"=== LinuxWebJob開始: {DateTime.Now:yyyy-MM-dd HH:mm:ss} ===");
+            LogAndTrackImmediate($"プロセスID: {_processId}");
         }
 
         static void Main(string[] args)
@@ -152,7 +155,7 @@ namespace LinuxWebJobs
             {
                 throw new InvalidOperationException("Application Insights接続文字列が設定されていません。appsettings.jsonを確認してください。");
             }
-            
+
             var config = new TelemetryConfiguration();
             config.ConnectionString = connectionString;
             _telemetryClient = new TelemetryClient(config);
@@ -205,10 +208,10 @@ namespace LinuxWebJobs
                         var now = DateTime.Now;
 
                         //日時をファイルに書き込む
-                        writer.WriteLine(now.ToString());
+                        writer.WriteLine($"[{_processId}] {now}");
                         writer.Flush(); // ファイルに直ちに書き出す
 
-                        Console.WriteLine($"now:{now.ToString()}");
+                        Console.WriteLine($"[{_processId}] now:{now}");
 
                         //1秒間待機
                         Thread.Sleep(1000);
@@ -218,7 +221,7 @@ namespace LinuxWebJobs
             catch (Exception ex)
             {
                 LogAndTrackImmediate($"エラーが発生しました: {ex.Message}", SeverityLevel.Error);
-                Console.WriteLine($"エラー: {ex.Message}");
+                Console.WriteLine($"[{_processId}] エラー: {ex.Message}");
             }
             finally
             {
@@ -248,7 +251,7 @@ namespace LinuxWebJobs
             {
                 string shutdownMessage = $"終了処理中... {i}/30秒 - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
                 LogAndTrackImmediate(shutdownMessage);
-                Console.WriteLine(shutdownMessage);
+                Console.WriteLine($"[{_processId}] {shutdownMessage}");
 
                 Thread.Sleep(1000); // 1秒間待機
             }
@@ -342,8 +345,11 @@ namespace LinuxWebJobs
         /// <param name="severityLevel">テレメトリの重要度レベル（省略可能）</param>
         static void LogAndTrackImmediate(string message, SeverityLevel severityLevel = SeverityLevel.Information)
         {
-            Trace.WriteLine(message);
-            _telemetryClient?.TrackTrace(message, severityLevel);
+            // プロセスIDを含めたメッセージを作成
+            string formattedMessage = $"[{_processId}] {message}";
+
+            Trace.WriteLine(formattedMessage);
+            _telemetryClient?.TrackTrace(formattedMessage, severityLevel);
             Trace.Flush();
             _telemetryClient?.Flush();
         }
