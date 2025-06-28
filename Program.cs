@@ -346,7 +346,8 @@ namespace LinuxWebJobs
         static void LogAndTrackImmediate(string message, SeverityLevel severityLevel = SeverityLevel.Information)
         {
             // プロセスIDを含めたメッセージを作成
-            string formattedMessage = $"[{_processId}] {message}";
+            var now = DateTime.Now;
+            string formattedMessage = $"[{_processId}] {now} {message}";
 
             Trace.WriteLine(formattedMessage);
             _telemetryClient?.TrackTrace(formattedMessage, severityLevel);
