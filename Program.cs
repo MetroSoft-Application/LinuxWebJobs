@@ -43,6 +43,13 @@ namespace LinuxWebJobs
             {
                 LogAndTrackImmediate("SIGTERM (Unloading) を受信", SeverityLevel.Warning);
                 RequestExit();
+                for (int i = 1; i <= 300; i++)
+                {
+                    string shutdownMessage = $"終了処理中... {i * 100}ms/30sec - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                    LogAndTrackImmediate(shutdownMessage);
+                    Console.WriteLine($"[{_processId}] {shutdownMessage}");
+                    Thread.Sleep(i * 100);
+                }
             };
 
             var lifetime = _host?.Services.GetRequiredService<IHostApplicationLifetime>();
@@ -60,9 +67,13 @@ namespace LinuxWebJobs
             {
                 LogAndTrackImmediate("SIGTERM またはプロセス終了シグナルを受信しました。終了処理を開始します...", SeverityLevel.Warning);
                 RequestExit();
-
-                // 終了処理の完了を少し待つ
-                Thread.Sleep(1000);
+                for (int i = 1; i <= 300; i++)
+                {
+                    string shutdownMessage = $"終了処理中... {i * 100}ms/30Sec - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                    LogAndTrackImmediate(shutdownMessage);
+                    Console.WriteLine($"[{_processId}] {shutdownMessage}");
+                    Thread.Sleep(i * 100);
+                }
             };
 
             // Windows環境での追加のシグナル処理
@@ -200,10 +211,6 @@ namespace LinuxWebJobs
                         string message = $"LinuxWebJob Running: {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
                         LogAndTrackImmediate(message);
 
-                        // Application Insights へのメトリック送信
-                        _telemetryClient?.TrackMetric("SampleMetric", 150);
-                        _telemetryClient?.Flush();
-
                         //現在の日時を取得
                         var now = DateTime.Now;
 
@@ -247,14 +254,17 @@ namespace LinuxWebJobs
 
             // 30秒間、1秒ごとにログ出力
             LogAndTrackImmediate("=== 終了処理中: 30秒間のログ出力を開始 ===");
-            for (int i = 1; i <= 30; i++)
-            {
-                string shutdownMessage = $"終了処理中... {i}/30秒 - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                LogAndTrackImmediate(shutdownMessage);
-                Console.WriteLine($"[{_processId}] {shutdownMessage}");
+            Thread.Sleep(10000);
+            LogAndTrackImmediate("20秒待機完了");
 
-                Thread.Sleep(1000); // 1秒間待機
-            }
+            //for (int i = 1; i <= 30; i++)
+            //{
+            //    string shutdownMessage = $"終了処理中... {i}/30秒 - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+            //    LogAndTrackImmediate(shutdownMessage);
+            //    Console.WriteLine($"[{_processId}] {shutdownMessage}");
+
+            //    Thread.Sleep(1000); // 1秒間待機
+            //}
 
             // ファイルリスナーをクローズ
             foreach (TraceListener listener in Trace.Listeners)
@@ -306,6 +316,13 @@ namespace LinuxWebJobs
                             if (File.Exists(shutdownFilePath))
                             {
                                 LogAndTrackImmediate($"Azure WebJobsシャットダウンファイルが検出されました: {shutdownFilePath}", SeverityLevel.Warning);
+                                for (int i = 1; i <= 300; i++)
+                                {
+                                    string shutdownMessage = $"終了処理中... {i * 100}ms/30sec - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                                    LogAndTrackImmediate(shutdownMessage);
+                                    Console.WriteLine($"[{_processId}] {shutdownMessage}");
+                                    Thread.Sleep(i * 100);
+                                }
                                 RequestExit();
                                 break;
                             }
